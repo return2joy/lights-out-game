@@ -1,0 +1,650 @@
+/* === Reset & Base === */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --color-bg: #1a1a2e;
+    --color-surface: #16213e;
+    --color-primary: #e94560;
+    --color-secondary: #533483;
+    --color-accent: #0f3460;
+    --color-text: #eee;
+    --color-text-dim: #999;
+    --color-gold: #ffd700;
+    --color-light-on: #ffd700;
+    --color-light-on-glow: rgba(255, 215, 0, 0.5);
+    --color-light-off: #3a3a5c;
+    --color-light-off-border: #2a2a4c;
+    --color-success: #4ade80;
+    --border-radius: 12px;
+    --transition: 0.2s ease;
+}
+
+body {
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* === Screens === */
+.screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.screen.active {
+    display: flex;
+}
+
+.screen-content {
+    background: var(--color-surface);
+    border-radius: var(--border-radius);
+    padding: 40px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--color-gold), #ff9500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: var(--color-gold);
+}
+
+.subtitle {
+    color: var(--color-text-dim);
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+}
+
+.welcome-msg {
+    color: var(--color-text-dim);
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+#display-nickname {
+    color: var(--color-gold);
+    font-weight: bold;
+}
+
+/* === Buttons === */
+.btn {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-primary), #d63851);
+    color: white;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, var(--color-secondary), #6c43a3);
+    color: white;
+}
+
+.btn-tertiary {
+    background: var(--color-accent);
+    color: var(--color-text);
+}
+
+.btn-large {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.15rem;
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    background: var(--color-accent);
+    color: var(--color-text);
+}
+
+.btn-danger {
+    background: #c0392b;
+    color: white;
+}
+
+/* === Nickname Form === */
+.nickname-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.nickname-form label {
+    font-size: 0.9rem;
+    color: var(--color-text-dim);
+    text-align: left;
+}
+
+input[type="text"] {
+    background: var(--color-bg);
+    border: 2px solid var(--color-accent);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--color-text);
+    font-size: 1.1rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color var(--transition);
+}
+
+input[type="text"]:focus {
+    border-color: var(--color-gold);
+}
+
+/* === Menu === */
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* === Settings === */
+.settings-group {
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.settings-group > label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--color-text-dim);
+    margin-bottom: 10px;
+}
+
+.grid-size-selector,
+.sound-theme-selector {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.size-btn, .theme-btn {
+    flex: 1;
+    min-width: 55px;
+    padding: 10px 8px;
+    border: 2px solid var(--color-accent);
+    background: transparent;
+    color: var(--color-text);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all var(--transition);
+}
+
+.size-btn:hover, .theme-btn:hover {
+    border-color: var(--color-gold);
+}
+
+.size-btn.active, .theme-btn.active {
+    background: var(--color-gold);
+    color: var(--color-bg);
+    border-color: var(--color-gold);
+    font-weight: bold;
+}
+
+input[type="range"] {
+    width: 80%;
+    margin-right: 10px;
+    accent-color: var(--color-gold);
+    vertical-align: middle;
+}
+
+#volume-display {
+    color: var(--color-gold);
+    font-weight: bold;
+}
+
+/* === Game Screen === */
+#game-screen {
+    flex-direction: column;
+    padding: 15px;
+    gap: 15px;
+}
+
+#game-screen.active {
+    display: flex;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.game-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.mode-label {
+    background: var(--color-primary);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.size-label {
+    background: var(--color-accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.game-stats {
+    display: flex;
+    gap: 16px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: var(--color-text-dim);
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--color-gold);
+    font-variant-numeric: tabular-nums;
+}
+
+/* === Game Grid === */
+.game-grid {
+    display: grid;
+    gap: 6px;
+    width: fit-content;
+    margin: 0 auto;
+    perspective: 800px;
+}
+
+.grid-cell {
+    width: 60px;
+    height: 60px;
+    border: 2px solid var(--color-light-off-border);
+    border-radius: 10px;
+    background: var(--color-light-off);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.grid-cell:hover {
+    transform: scale(1.05);
+    border-color: #555;
+}
+
+.grid-cell:active {
+    transform: scale(0.95);
+}
+
+.grid-cell.on {
+    background: var(--color-light-on);
+    border-color: var(--color-gold);
+    box-shadow: 0 0 20px var(--color-light-on-glow), 0 0 40px rgba(255, 215, 0, 0.2);
+}
+
+.grid-cell.on::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.4) 0%, transparent 60%);
+    border-radius: 8px;
+}
+
+/* Ripple animation */
+.grid-cell.ripple::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: ripple-effect 0.4s ease-out;
+}
+
+@keyframes ripple-effect {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+.game-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* === Modal === */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--color-surface);
+    border-radius: var(--border-radius);
+    padding: 32px;
+    max-width: 450px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: modal-in 0.3s ease;
+}
+
+@keyframes modal-in {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-content label {
+    display: block;
+    text-align: left;
+    font-size: 0.9rem;
+    color: var(--color-text-dim);
+    margin-bottom: 8px;
+}
+
+.modal-content input[type="text"] {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.modal-buttons .btn {
+    flex: 1;
+    min-width: 100px;
+}
+
+/* === Clear Stats === */
+.clear-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+}
+
+.clear-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.clear-stat-label {
+    font-size: 0.8rem;
+    color: var(--color-text-dim);
+    margin-bottom: 4px;
+}
+
+.clear-stat-value {
+    font-size: 1.6rem;
+    font-weight: bold;
+}
+
+.clear-stat-value.highlight {
+    color: var(--color-gold);
+    font-size: 2rem;
+}
+
+/* === Pattern List === */
+.pattern-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 16px 0;
+}
+
+.pattern-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--color-bg);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: background var(--transition);
+}
+
+.pattern-item:hover {
+    background: var(--color-accent);
+}
+
+.pattern-item-info {
+    text-align: left;
+}
+
+.pattern-item-name {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.pattern-item-meta {
+    font-size: 0.75rem;
+    color: var(--color-text-dim);
+}
+
+.pattern-item-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.pattern-item-actions .btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.empty-msg {
+    color: var(--color-text-dim);
+    padding: 30px;
+    font-size: 0.95rem;
+}
+
+/* === Ranking === */
+.ranking-filter {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.filter-btn {
+    padding: 6px 14px;
+    border: 2px solid var(--color-accent);
+    background: transparent;
+    color: var(--color-text);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: all var(--transition);
+}
+
+.filter-btn:hover {
+    border-color: var(--color-gold);
+}
+
+.filter-btn.active {
+    background: var(--color-gold);
+    color: var(--color-bg);
+    border-color: var(--color-gold);
+    font-weight: bold;
+}
+
+.ranking-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.ranking-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--color-bg);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    gap: 14px;
+}
+
+.ranking-rank {
+    font-size: 1.3rem;
+    font-weight: bold;
+    min-width: 36px;
+    text-align: center;
+}
+
+.ranking-rank.gold { color: #ffd700; }
+.ranking-rank.silver { color: #c0c0c0; }
+.ranking-rank.bronze { color: #cd7f32; }
+
+.ranking-info {
+    flex: 1;
+    text-align: left;
+}
+
+.ranking-name {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.ranking-detail {
+    font-size: 0.75rem;
+    color: var(--color-text-dim);
+}
+
+.ranking-score {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-gold);
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-accent);
+    border-radius: 3px;
+}
+
+/* === Responsive === */
+@media (max-width: 480px) {
+    .screen-content {
+        padding: 24px 20px;
+    }
+
+    h1 { font-size: 1.5rem; }
+
+    .grid-cell {
+        width: 48px;
+        height: 48px;
+    }
+
+    .game-header {
+        font-size: 0.85rem;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+    }
+
+    .clear-stats {
+        gap: 16px;
+    }
+
+    .modal-content {
+        padding: 24px 20px;
+    }
+
+    .theme-btn {
+        font-size: 0.8rem;
+        padding: 8px 6px;
+    }
+}
+
+@media (max-width: 360px) {
+    .grid-cell {
+        width: 40px;
+        height: 40px;
+    }
+}
