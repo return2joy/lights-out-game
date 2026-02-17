@@ -115,21 +115,85 @@
         osc.stop(audioCtx.currentTime + def.duration + 0.05);
     }
 
+    function playStartSound() {
+        if (state.volume === 0) return;
+        const vol = state.volume / 100;
+        // 고양이 울음소리 (시작)
+        const catMeow = soundDefs.animal[0];
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = catMeow.type;
+        osc.frequency.setValueAtTime(catMeow.freq, audioCtx.currentTime);
+
+        if (catMeow.sweep) {
+            osc.frequency.exponentialRampToValueAtTime(
+                catMeow.freq * catMeow.sweep,
+                audioCtx.currentTime + catMeow.duration
+            );
+        }
+
+        if (catMeow.vibrato) {
+            const lfo = audioCtx.createOscillator();
+            const lfoGain = audioCtx.createGain();
+            lfo.frequency.value = catMeow.vibrato;
+            lfoGain.gain.value = 50;
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            lfo.start();
+            lfo.stop(audioCtx.currentTime + catMeow.duration);
+        }
+
+        gain.gain.setValueAtTime(vol * 0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + catMeow.duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + catMeow.duration + 0.05);
+    }
+
     function playClearSound() {
         if (state.volume === 0) return;
         const vol = state.volume / 100;
-        const notes = [523, 659, 784, 1047];
-        notes.forEach((freq, i) => {
+        // 고양이 울음소리 (끝낼 때 - 여러 번)
+        const catMeow = soundDefs.animal[0];
+        const delays = [0, 0.35, 0.7]; // 3번의 고양이 울음
+        
+        delays.forEach((delay, i) => {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = freq;
-            gain.gain.setValueAtTime(vol * 0.2, audioCtx.currentTime + i * 0.12);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.12 + 0.3);
+
+            osc.type = catMeow.type;
+            osc.frequency.setValueAtTime(catMeow.freq * (1 + i * 0.2), audioCtx.currentTime + delay);
+
+            if (catMeow.sweep) {
+                osc.frequency.exponentialRampToValueAtTime(
+                    (catMeow.freq * (1 + i * 0.2)) * catMeow.sweep,
+                    audioCtx.currentTime + delay + catMeow.duration
+                );
+            }
+
+            if (catMeow.vibrato) {
+                const lfo = audioCtx.createOscillator();
+                const lfoGain = audioCtx.createGain();
+                lfo.frequency.value = catMeow.vibrato;
+                lfoGain.gain.value = 50;
+                lfo.connect(lfoGain);
+                lfoGain.connect(osc.frequency);
+                lfo.start(audioCtx.currentTime + delay);
+                lfo.stop(audioCtx.currentTime + delay + catMeow.duration);
+            }
+
+            gain.gain.setValueAtTime(vol * 0.3, audioCtx.currentTime + delay);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + catMeow.duration);
+
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            osc.start(audioCtx.currentTime + i * 0.12);
-            osc.stop(audioCtx.currentTime + i * 0.12 + 0.35);
+
+            osc.start(audioCtx.currentTime + delay);
+            osc.stop(audioCtx.currentTime + delay + catMeow.duration + 0.05);
         });
     }
 
@@ -946,6 +1010,7 @@
             state.initialGrid = createGrid(state.gridSize);
         }
 
+        playStartSound();
         showScreen('game');
         updateGameUI();
         renderGrid();
