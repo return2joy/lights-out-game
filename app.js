@@ -118,40 +118,36 @@
     function playStartSound() {
         if (state.volume === 0) return;
         const vol = state.volume / 100;
-        // 고양이 울음소리 (시작)
-        const catMeow = soundDefs.animal[0];
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = catMeow.type;
-        osc.frequency.setValueAtTime(catMeow.freq, audioCtx.currentTime);
-
-        if (catMeow.sweep) {
-            osc.frequency.exponentialRampToValueAtTime(
-                catMeow.freq * catMeow.sweep,
-                audioCtx.currentTime + catMeow.duration
-            );
-        }
-
-        if (catMeow.vibrato) {
-            const lfo = audioCtx.createOscillator();
-            const lfoGain = audioCtx.createGain();
-            lfo.frequency.value = catMeow.vibrato;
-            lfoGain.gain.value = 50;
-            lfo.connect(lfoGain);
-            lfoGain.connect(osc.frequency);
-            lfo.start();
-            lfo.stop(audioCtx.currentTime + catMeow.duration);
-        }
-
-        gain.gain.setValueAtTime(vol * 0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + catMeow.duration);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + catMeow.duration + 0.05);
+        // 고양이 울음소리 (시작) - 더 강하고 명확한 뮤 소리
+        const duration = 0.35;
+        const startFreq = 600;
+        const endFreq = 450;
+        
+        // 첫 번째 고양이 울음 (높은 음)
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(startFreq, audioCtx.currentTime);
+        osc1.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + duration);
+        
+        // 비브라토 추가
+        const lfo1 = audioCtx.createOscillator();
+        const lfoGain1 = audioCtx.createGain();
+        lfo1.frequency.value = 5;
+        lfoGain1.gain.value = 80;
+        lfo1.connect(lfoGain1);
+        lfoGain1.connect(osc1.frequency);
+        
+        gain1.gain.setValueAtTime(vol * 0.5, audioCtx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        
+        lfo1.start();
+        osc1.start();
+        lfo1.stop(audioCtx.currentTime + duration);
+        osc1.stop(audioCtx.currentTime + duration + 0.05);
     }
 
     function playClearSound() {
