@@ -19,6 +19,9 @@
         startTime: null,
         elapsedSeconds: 0,
         isPlaying: false,
+        guideMode: false,
+        guideMoves: [],
+        autoSolving: false,
     };
 
     // === DOM Elements ===
@@ -173,6 +176,159 @@
         return grid;
     }
 
+    // === Solver (Gaussian elimination over GF(2)) ===
+    function solveLightsOut(grid) {
+        const n = grid.length;
+        const N = n * n;
+
+        // Build augmented matrix [A | b]
+        const matrix = [];
+        for (let i = 0; i < N; i++) {
+            const row = new Uint8Array(N + 1);
+            const ir = Math.floor(i / n);
+            const ic = i % n;
+            row[N] = grid[ir][ic] ? 1 : 0;
+
+            for (let j = 0; j < N; j++) {
+                const jr = Math.floor(j / n);
+                const jc = j % n;
+                if ((jr === ir && jc === ic) ||
+                    (jr === ir - 1 && jc === ic) ||
+                    (jr === ir + 1 && jc === ic) ||
+                    (jr === ir && jc === ic - 1) ||
+                    (jr === ir && jc === ic + 1)) {
+                    row[j] = 1;
+                }
+            }
+            matrix.push(row);
+        }
+
+        // Gaussian elimination over GF(2)
+        let pivotRow = 0;
+        const pivotCols = new Array(N).fill(-1);
+
+        for (let col = 0; col < N && pivotRow < N; col++) {
+            let found = -1;
+            for (let row = pivotRow; row < N; row++) {
+                if (matrix[row][col] === 1) {
+                    found = row;
+                    break;
+                }
+            }
+            if (found === -1) continue;
+
+            [matrix[pivotRow], matrix[found]] = [matrix[found], matrix[pivotRow]];
+            pivotCols[col] = pivotRow;
+
+            for (let row = 0; row < N; row++) {
+                if (row !== pivotRow && matrix[row][col] === 1) {
+                    for (let k = 0; k <= N; k++) {
+                        matrix[row][k] ^= matrix[pivotRow][k];
+                    }
+                }
+            }
+            pivotRow++;
+        }
+
+        // Check for inconsistency
+        for (let row = pivotRow; row < N; row++) {
+            if (matrix[row][N] === 1) return null;
+        }
+
+        // Extract solution
+        const solution = new Array(N).fill(0);
+        for (let col = 0; col < N; col++) {
+            if (pivotCols[col] !== -1) {
+                solution[col] = matrix[pivotCols[col]][N];
+            }
+        }
+
+        const moves = [];
+        for (let i = 0; i < N; i++) {
+            if (solution[i] === 1) {
+                moves.push([Math.floor(i / n), i % n]);
+            }
+        }
+        return moves;
+    }
+
+    // === Auto-Solve ===
+    async function autoSolve() {
+        if (state.autoSolving) return;
+
+        const solution = solveLightsOut(state.grid);
+        if (!solution || solution.length === 0) {
+            if (!solution) alert('이 퍼즐은 풀 수 없습니다!');
+            return;
+        }
+
+        state.autoSolving = true;
+        state.guideMode = false;
+        state.guideMoves = [];
+        $('#guide-btn').classList.remove('active');
+        $('#auto-solve-btn').disabled = true;
+        $('#guide-btn').disabled = true;
+        $('#reset-btn').disabled = true;
+        stopTimer();
+
+        for (const [r, c] of solution) {
+            await new Promise(resolve => setTimeout(resolve, 350));
+            toggleCell(state.grid, r, c);
+            playSound((r * state.gridSize + c) % 5);
+
+            // Ripple animation
+            const cells = $$('.grid-cell');
+            const idx = r * state.gridSize + c;
+            const neighbors = [
+                idx,
+                r > 0 ? idx - state.gridSize : -1,
+                r < state.gridSize - 1 ? idx + state.gridSize : -1,
+                c > 0 ? idx - 1 : -1,
+                c < state.gridSize - 1 ? idx + 1 : -1,
+            ];
+            neighbors.forEach(i => {
+                if (i >= 0 && i < cells.length) {
+                    cells[i].classList.add('ripple');
+                    setTimeout(() => cells[i].classList.remove('ripple'), 400);
+                }
+            });
+
+            renderGrid();
+        }
+
+        state.autoSolving = false;
+        $('#auto-solve-btn').disabled = false;
+        $('#guide-btn').disabled = false;
+        $('#reset-btn').disabled = false;
+
+        if (isCleared(state.grid)) {
+            playClearSound();
+        }
+    }
+
+    // === Guide Toggle ===
+    function toggleGuide() {
+        if (state.autoSolving) return;
+
+        state.guideMode = !state.guideMode;
+
+        if (state.guideMode) {
+            const solution = solveLightsOut(state.grid);
+            if (!solution) {
+                alert('이 퍼즐은 풀 수 없습니다!');
+                state.guideMode = false;
+                return;
+            }
+            state.guideMoves = solution;
+            $('#guide-btn').classList.add('active');
+        } else {
+            state.guideMoves = [];
+            $('#guide-btn').classList.remove('active');
+        }
+
+        renderGrid();
+    }
+
     // === Rendering ===
     function renderGrid() {
         const gridEl = $('#game-grid');
@@ -184,10 +340,18 @@
         const cellSize = Math.floor((maxWidth - (state.gridSize - 1) * 6) / state.gridSize);
         const clampedSize = Math.min(Math.max(cellSize, 36), 70);
 
+        const guideSet = state.guideMode
+            ? new Set(state.guideMoves.map(([gr, gc]) => gr * state.gridSize + gc))
+            : null;
+
         state.grid.forEach((row, r) => {
             row.forEach((isOn, c) => {
                 const cell = document.createElement('button');
-                cell.className = 'grid-cell' + (isOn ? ' on' : '');
+                let className = 'grid-cell' + (isOn ? ' on' : '');
+                if (guideSet && guideSet.has(r * state.gridSize + c)) {
+                    className += ' guide';
+                }
+                cell.className = className;
                 cell.style.width = clampedSize + 'px';
                 cell.style.height = clampedSize + 'px';
                 cell.dataset.row = r;
@@ -229,6 +393,8 @@
 
     // === Cell Click ===
     function onCellClick(row, col) {
+        if (state.autoSolving) return;
+
         // Resume AudioContext if suspended (browser autoplay policy)
         if (audioCtx.state === 'suspended') audioCtx.resume();
 
@@ -261,11 +427,19 @@
             }
         });
 
+        // Recalculate guide after each move
+        if (state.guideMode) {
+            state.guideMoves = solveLightsOut(state.grid) || [];
+        }
+
         renderGrid();
         updateStats();
 
         // Check clear in play mode
         if (state.mode === 'play' && isCleared(state.grid)) {
+            state.guideMode = false;
+            state.guideMoves = [];
+            $('#guide-btn').classList.remove('active');
             stopTimer();
             onGameClear();
         }
@@ -419,6 +593,9 @@
         state.mode = 'play';
         state.moves = 0;
         state.elapsedSeconds = 0;
+        state.guideMode = false;
+        state.guideMoves = [];
+        state.autoSolving = false;
         stopTimer();
 
         hideModal('load');
@@ -508,6 +685,9 @@
             ? 'var(--color-primary)' : 'var(--color-secondary)';
         $('#grid-size-label').textContent = `${state.gridSize}×${state.gridSize}`;
         $('#save-pattern-btn').style.display = state.mode === 'create' ? 'inline-block' : 'none';
+        $('#auto-solve-btn').style.display = state.mode === 'play' ? 'inline-block' : 'none';
+        $('#guide-btn').style.display = state.mode === 'play' ? 'inline-block' : 'none';
+        $('#guide-btn').classList.remove('active');
     }
 
     // === Utility ===
@@ -609,6 +789,9 @@
         // === Game ===
         $('#game-back-btn').addEventListener('click', () => {
             stopTimer();
+            state.guideMode = false;
+            state.guideMoves = [];
+            state.autoSolving = false;
             showScreen('menu');
         });
 
@@ -620,10 +803,22 @@
             }
             state.moves = 0;
             state.elapsedSeconds = 0;
+            state.guideMode = false;
+            state.guideMoves = [];
+            $('#guide-btn').classList.remove('active');
             stopTimer();
             renderGrid();
             updateStats();
             updateTimer();
+        });
+
+        $('#auto-solve-btn').addEventListener('click', () => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            autoSolve();
+        });
+
+        $('#guide-btn').addEventListener('click', () => {
+            toggleGuide();
         });
 
         $('#save-pattern-btn').addEventListener('click', () => {
@@ -738,6 +933,9 @@
         state.mode = mode;
         state.moves = 0;
         state.elapsedSeconds = 0;
+        state.guideMode = false;
+        state.guideMoves = [];
+        state.autoSolving = false;
         stopTimer();
 
         if (mode === 'play') {

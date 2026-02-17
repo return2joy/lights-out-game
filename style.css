@@ -349,6 +349,31 @@ input[type="range"] {
     border-radius: 8px;
 }
 
+/* Guide cell highlight */
+.grid-cell.guide {
+    background: #1e5799;
+    border-color: #4a9eff;
+    box-shadow: 0 0 15px rgba(74, 158, 255, 0.6), 0 0 30px rgba(74, 158, 255, 0.3);
+    animation: guide-pulse 1.5s ease-in-out infinite;
+}
+
+.grid-cell.on.guide {
+    background: linear-gradient(135deg, var(--color-light-on), #4a9eff);
+    border-color: #4a9eff;
+    box-shadow: 0 0 15px rgba(74, 158, 255, 0.6), 0 0 20px var(--color-light-on-glow);
+    animation: guide-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes guide-pulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(74, 158, 255, 0.6), 0 0 30px rgba(74, 158, 255, 0.3); }
+    50% { box-shadow: 0 0 25px rgba(74, 158, 255, 0.9), 0 0 50px rgba(74, 158, 255, 0.5); }
+}
+
+#guide-btn.active {
+    background: linear-gradient(135deg, #1e5799, #4a9eff);
+    color: white;
+}
+
 /* Ripple animation */
 .grid-cell.ripple::before {
     content: '';
